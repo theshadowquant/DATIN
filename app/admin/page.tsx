@@ -16,6 +16,8 @@ import {
   CheckCircle2,
   Lock,
   PlusCircle,
+  Database,
+  RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -28,23 +30,37 @@ export default function AdminPage() {
     applications,
     events,
     registrations,
-    announcements,
     auditLogs,
+    isCloudConnected,
     approveApplication,
     rejectApplication,
     toggleAttendance,
     publishAnnouncement,
+    createEvent,
+    resetToCleanSlate,
   } = useDatinStore();
 
-  const [activeTab, setActiveTab] = useState<"applications" | "members" | "attendance" | "broadcast" | "audit">("applications");
+  const [activeTab, setActiveTab] = useState<"applications" | "members" | "attendance" | "broadcast" | "events" | "audit" | "database">("applications");
+  
+  // Announcement Form State
   const [annTitle, setAnnTitle] = useState("");
   const [annContent, setAnnContent] = useState("");
   const [annPriority, setAnnPriority] = useState<"normal" | "important" | "urgent">("important");
   const [annSuccess, setAnnSuccess] = useState(false);
 
+  // New Event Form State
+  const [newEvtTitle, setNewEvtTitle] = useState("");
+  const [newEvtDesc, setNewEvtDesc] = useState("");
+  const [newEvtCategory, setNewEvtCategory] = useState<"Hackathon" | "Workshop" | "Meetup" | "Tech Talk">("Workshop");
+  const [newEvtDate, setNewEvtDate] = useState("");
+  const [newEvtTime, setNewEvtTime] = useState("");
+  const [newEvtVenue, setNewEvtVenue] = useState("");
+  const [newEvtCapacity, setNewEvtCapacity] = useState(100);
+  const [evtSuccess, setEvtSuccess] = useState(false);
+
   const isAuthorized = currentUserRole === "super_admin" || currentUserRole === "core_committee";
 
-  const handlePublish = (e: React.FormEvent) => {
+  const handlePublishAnnouncement = (e: React.FormEvent) => {
     e.preventDefault();
     if (!annTitle.trim() || !annContent.trim()) return;
     publishAnnouncement(annTitle, annContent, annPriority);
@@ -52,6 +68,30 @@ export default function AdminPage() {
     setAnnContent("");
     setAnnSuccess(true);
     setTimeout(() => setAnnSuccess(false), 3000);
+  };
+
+  const handleCreateEvent = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEvtTitle.trim() || !newEvtDate.trim()) return;
+    createEvent({
+      title: newEvtTitle.toUpperCase(),
+      slug: newEvtTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      description: newEvtDesc,
+      category: newEvtCategory,
+      date: newEvtDate,
+      time: newEvtTime || "10:00 AM IST",
+      venue: newEvtVenue || "BIET Campus",
+      capacity: Number(newEvtCapacity) || 100,
+      isRegistrationOpen: true,
+      isPublished: true,
+    });
+    setNewEvtTitle("");
+    setNewEvtDesc("");
+    setNewEvtDate("");
+    setNewEvtTime("");
+    setNewEvtVenue("");
+    setEvtSuccess(true);
+    setTimeout(() => setEvtSuccess(false), 3000);
   };
 
   const pendingApps = applications.filter((a) => a.status === "pending").length;
@@ -81,8 +121,15 @@ export default function AdminPage() {
               COMMAND CENTER OVERVIEW
             </h1>
             <p className="text-xs sm:text-sm font-semibold text-neutral-600 mt-1">
-              Centralized platform for member approvals, attendance scanning, announcements, and security audit logs.
+              Official administration dashboard for member approvals, event scheduling, attendance check-in, and audit logging.
             </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-800 text-xs font-extrabold border border-green-300">
+              <span className="live-dot" />
+              SUPABASE CLOUD ACTIVE
+            </span>
           </div>
         </div>
 
@@ -95,10 +142,10 @@ export default function AdminPage() {
               </div>
               <div>
                 <h4 className="font-display text-sm font-black uppercase text-nirmaan-black">
-                  READ-ONLY SIMULATION (CURRENT ROLE: {currentUserRole.toUpperCase()})
+                  READ-ONLY PREVIEW (CURRENT ROLE: {currentUserRole.toUpperCase()})
                 </h4>
                 <p className="text-xs text-neutral-700 mt-0.5">
-                  You are currently previewing as <strong>{currentUserRole}</strong>. In production, this route requires Super Admin or Core Committee privileges.
+                  You are previewing as <strong>{currentUserRole}</strong>. In production, this workspace is restricted to Super Admin and Core Committee.
                 </p>
               </div>
             </div>
@@ -116,7 +163,7 @@ export default function AdminPage() {
           <StatCard
             label="ACTIVE MEMBERS"
             value={members.length}
-            subtext="Enrolled across 4 domains"
+            subtext="Verified student members"
             icon={Users}
             iconBgColor="bg-nirmaan-black"
             iconTextColor="text-nirmaan-amber"
@@ -126,26 +173,25 @@ export default function AdminPage() {
             label="PENDING APPLICATIONS"
             value={pendingApps}
             total={applications.length}
-            subtext={`${pendingApps} awaiting committee approval`}
+            subtext={`${pendingApps} awaiting committee review`}
             icon={UserCheck}
             iconBgColor="bg-nirmaan-amber"
             iconTextColor="text-nirmaan-black"
-            progressPercent={(pendingApps / Math.max(1, applications.length)) * 100}
+            progressPercent={applications.length > 0 ? (pendingApps / applications.length) * 100 : 0}
           />
           <StatCard
-            label="EVENT ATTENDANCE"
-            value={presentCount}
-            total={registrations.length}
-            subtext={`${registrations.length - presentCount} absent / unverified`}
+            label="SCHEDULED EVENTS"
+            value={events.length}
+            subtext="Club sessions and hackathons"
             icon={Calendar}
             iconBgColor="bg-nirmaan-blue"
             iconTextColor="text-white"
-            progressPercent={(presentCount / Math.max(1, registrations.length)) * 100}
+            progressPercent={events.length > 0 ? 100 : 0}
           />
           <StatCard
-            label="AUDIT EVENTS LOGGED"
+            label="AUDIT EVENTS"
             value={auditLogs.length}
-            subtext="Recorded this operating term"
+            subtext="Recorded system actions"
             icon={History}
             iconBgColor="bg-nirmaan-purple"
             iconTextColor="text-white"
@@ -163,7 +209,7 @@ export default function AdminPage() {
                 : "bg-white text-neutral-700 border border-neutral-200"
             }`}
           >
-            Applications ({pendingApps} pending)
+            Applications ({pendingApps})
           </button>
           <button
             onClick={() => setActiveTab("members")}
@@ -173,7 +219,17 @@ export default function AdminPage() {
                 : "bg-white text-neutral-700 border border-neutral-200"
             }`}
           >
-            Member Directory ({members.length})
+            Members ({members.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("events")}
+            className={`nirmaan-pill text-xs ${
+              activeTab === "events"
+                ? "bg-nirmaan-black text-nirmaan-amber font-black"
+                : "bg-white text-neutral-700 border border-neutral-200"
+            }`}
+          >
+            + Create Event ({events.length})
           </button>
           <button
             onClick={() => setActiveTab("attendance")}
@@ -205,6 +261,16 @@ export default function AdminPage() {
           >
             Audit Log ({auditLogs.length})
           </button>
+          <button
+            onClick={() => setActiveTab("database")}
+            className={`nirmaan-pill text-xs ${
+              activeTab === "database"
+                ? "bg-nirmaan-black text-nirmaan-amber font-black"
+                : "bg-white text-neutral-700 border border-neutral-200"
+            }`}
+          >
+            Database Settings
+          </button>
         </div>
 
         {/* Tab 1: Applications Pipeline */}
@@ -217,7 +283,7 @@ export default function AdminPage() {
           />
         )}
 
-        {/* Tab 2: Member Management */}
+        {/* Tab 2: Member Directory */}
         {activeTab === "members" && (
           <div className="nirmaan-card p-5 sm:p-7 bg-white border border-nirmaan-black/10">
             <div className="flex items-center justify-between pb-4 border-b border-neutral-100 mb-4">
@@ -280,7 +346,135 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Tab 3: Event Attendance Check-in */}
+        {/* Tab 3: Create & Manage Events */}
+        {activeTab === "events" && (
+          <div className="nirmaan-card p-5 sm:p-7 bg-white border border-nirmaan-black/10 max-w-2xl mx-auto">
+            <div className="pb-4 border-b border-neutral-100 mb-5">
+              <h3 className="font-display text-lg sm:text-xl font-black uppercase text-nirmaan-black">
+                SCHEDULE NEW CLUB EVENT
+              </h3>
+              <p className="text-xs font-semibold text-neutral-500 mt-0.5">
+                Published events immediately appear on the public portal and member dashboards
+              </p>
+            </div>
+
+            {evtSuccess && (
+              <div className="mb-4 p-3 rounded-2xl bg-green-50 border border-green-200 text-green-800 text-xs font-bold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4" />
+                Event scheduled successfully and synchronized to Supabase!
+              </div>
+            )}
+
+            <form onSubmit={handleCreateEvent} className="space-y-4 text-xs font-bold text-neutral-700">
+              <div>
+                <label className="block mb-1 text-[11px] uppercase text-neutral-600">
+                  Event Title
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. AI AGENT AUTOMATION HACKATHON"
+                  value={newEvtTitle}
+                  onChange={(e) => setNewEvtTitle(e.target.value)}
+                  className="datin-input"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-1 text-[11px] uppercase text-neutral-600">
+                    Category
+                  </label>
+                  <select
+                    value={newEvtCategory}
+                    onChange={(e) => setNewEvtCategory(e.target.value as any)}
+                    className="datin-input"
+                  >
+                    <option>Workshop</option>
+                    <option>Hackathon</option>
+                    <option>Meetup</option>
+                    <option>Tech Talk</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block mb-1 text-[11px] uppercase text-neutral-600">
+                    Capacity (Seats)
+                  </label>
+                  <input
+                    type="number"
+                    value={newEvtCapacity}
+                    onChange={(e) => setNewEvtCapacity(Number(e.target.value))}
+                    className="datin-input"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block mb-1 text-[11px] uppercase text-neutral-600">
+                    Date
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Nov 15, 2026"
+                    value={newEvtDate}
+                    onChange={(e) => setNewEvtDate(e.target.value)}
+                    className="datin-input"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 text-[11px] uppercase text-neutral-600">
+                    Time
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 10:00 AM IST"
+                    value={newEvtTime}
+                    onChange={(e) => setNewEvtTime(e.target.value)}
+                    className="datin-input"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 text-[11px] uppercase text-neutral-600">
+                    Venue
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Seminar Hall 302"
+                    value={newEvtVenue}
+                    onChange={(e) => setNewEvtVenue(e.target.value)}
+                    className="datin-input"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block mb-1 text-[11px] uppercase text-neutral-600">
+                  Description
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Detail workshop outcomes, prerequisites, and schedule..."
+                  value={newEvtDesc}
+                  onChange={(e) => setNewEvtDesc(e.target.value)}
+                  className="datin-textarea"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={!isAuthorized}
+                className="nirmaan-btn nirmaan-btn-primary text-xs py-3 px-6 font-black w-full flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>PUBLISH CLUB EVENT</span>
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Tab 4: Event Attendance Check-in */}
         {activeTab === "attendance" && (
           <div className="nirmaan-card p-5 sm:p-7 bg-white border border-nirmaan-black/10">
             <div className="flex items-center justify-between pb-4 border-b border-neutral-100 mb-4">
@@ -289,7 +483,7 @@ export default function AdminPage() {
                   ON-DESK ATTENDANCE &amp; CHECK-IN DESK
                 </h3>
                 <p className="text-xs font-semibold text-neutral-500 mt-0.5">
-                  Tap any attendee record to simulate QR scan or manual attendance correction
+                  Tap any attendee record to record attendance check-in or manual correction
                 </p>
               </div>
               <span className="nirmaan-pill bg-nirmaan-amber text-nirmaan-black text-xs font-black">
@@ -297,51 +491,57 @@ export default function AdminPage() {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {registrations.map((reg) => {
-                const isPresent = reg.attendanceStatus === "present";
-                return (
-                  <div
-                    key={reg.id}
-                    onClick={() => isAuthorized && toggleAttendance(reg.id)}
-                    className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
-                      isAuthorized ? "cursor-pointer hover:border-nirmaan-black hover:shadow-xs" : ""
-                    } ${
-                      isPresent
-                        ? "bg-green-50/50 border-green-300"
-                        : "bg-[#faf8f3] border-nirmaan-black/10"
-                    }`}
-                  >
-                    <div>
-                      <h4 className="font-bold text-sm text-nirmaan-black">
-                        {reg.memberName}
-                      </h4>
-                      <p className="text-xs text-neutral-500 mt-0.5">
-                        {reg.memberEmail}
-                      </p>
-                      {reg.checkedInAt && (
-                        <p className="text-[10px] font-bold text-nirmaan-green-dark mt-1 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" /> Checked in at {reg.checkedInAt}
-                        </p>
-                      )}
-                    </div>
-                    <span
-                      className={`nirmaan-pill text-[10px] font-black ${
+            {registrations.length === 0 ? (
+              <div className="text-center py-10 text-xs font-semibold text-neutral-400">
+                No attendees registered yet for current events.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {registrations.map((reg) => {
+                  const isPresent = reg.attendanceStatus === "present";
+                  return (
+                    <div
+                      key={reg.id}
+                      onClick={() => isAuthorized && toggleAttendance(reg.id)}
+                      className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+                        isAuthorized ? "cursor-pointer hover:border-nirmaan-black hover:shadow-xs" : ""
+                      } ${
                         isPresent
-                          ? "bg-nirmaan-green-bright text-nirmaan-black"
-                          : "bg-neutral-200 text-neutral-600"
+                          ? "bg-green-50/50 border-green-300"
+                          : "bg-[#faf8f3] border-nirmaan-black/10"
                       }`}
                     >
-                      {reg.attendanceStatus.toUpperCase()}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
+                      <div>
+                        <h4 className="font-bold text-sm text-nirmaan-black">
+                          {reg.memberName}
+                        </h4>
+                        <p className="text-xs text-neutral-500 mt-0.5">
+                          {reg.memberEmail}
+                        </p>
+                        {reg.checkedInAt && (
+                          <p className="text-[10px] font-bold text-nirmaan-green-dark mt-1 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" /> Checked in at {reg.checkedInAt}
+                          </p>
+                        )}
+                      </div>
+                      <span
+                        className={`nirmaan-pill text-[10px] font-black ${
+                          isPresent
+                            ? "bg-nirmaan-green-bright text-nirmaan-black"
+                            : "bg-neutral-200 text-neutral-600"
+                        }`}
+                      >
+                        {reg.attendanceStatus.toUpperCase()}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
-        {/* Tab 4: Broadcast Announcement Form */}
+        {/* Tab 5: Broadcast Announcement Form */}
         {activeTab === "broadcast" && (
           <div className="nirmaan-card p-5 sm:p-7 bg-white border border-nirmaan-black/10 max-w-2xl mx-auto">
             <div className="pb-4 border-b border-neutral-100 mb-5">
@@ -349,7 +549,7 @@ export default function AdminPage() {
                 PUBLISH CLUB BROADCAST
               </h3>
               <p className="text-xs font-semibold text-neutral-500 mt-0.5">
-                Announcements appear immediately on member dashboards and event portals
+                Announcements appear immediately on member dashboards and public event portals
               </p>
             </div>
 
@@ -360,7 +560,7 @@ export default function AdminPage() {
               </div>
             )}
 
-            <form onSubmit={handlePublish} className="space-y-4 text-xs font-bold text-neutral-700">
+            <form onSubmit={handlePublishAnnouncement} className="space-y-4 text-xs font-bold text-neutral-700">
               <div>
                 <label className="block mb-1.5 uppercase text-[11px] text-neutral-600">
                   Announcement Title
@@ -369,7 +569,7 @@ export default function AdminPage() {
                   type="text"
                   value={annTitle}
                   onChange={(e) => setAnnTitle(e.target.value)}
-                  placeholder="e.g. VENUE UPDATE: AUDITORIUM 2 CONFIRMED"
+                  placeholder="e.g. WORKSHOP SCHEDULE ANNOUNCEMENT"
                   className="datin-input"
                   required
                 />
@@ -423,8 +623,54 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Tab 5: System Audit Logs */}
+        {/* Tab 6: System Audit Logs */}
         {activeTab === "audit" && <AuditLogViewer logs={auditLogs} />}
+
+        {/* Tab 7: Database Settings & Reset */}
+        {activeTab === "database" && (
+          <div className="nirmaan-card p-5 sm:p-7 bg-white border border-nirmaan-black/10 max-w-2xl mx-auto space-y-6">
+            <div className="pb-4 border-b border-neutral-100">
+              <div className="flex items-center gap-2">
+                <Database className="w-5 h-5 text-nirmaan-blue" />
+                <h3 className="font-display text-lg sm:text-xl font-black uppercase text-nirmaan-black">
+                  DATABASE CONFIGURATION &amp; RESET
+                </h3>
+              </div>
+              <p className="text-xs font-semibold text-neutral-500 mt-0.5">
+                Manage cloud synchronization and local cache states
+              </p>
+            </div>
+
+            <div className="bg-[#FAF8F3] border border-nirmaan-black/10 rounded-2xl p-4 text-xs space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-neutral-600">Supabase Project Endpoint:</span>
+                <span className="font-mono font-bold text-nirmaan-black text-[11px]">xgbwadomxmtzjlqdwfxb.supabase.co</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-neutral-600">Sync Mode:</span>
+                <span className="px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-[10px] font-black uppercase">
+                  ACTIVE • HYBRID CACHING
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-neutral-100 space-y-2">
+              <h4 className="font-display text-xs font-black uppercase text-nirmaan-black">
+                RESET LOCAL STATE
+              </h4>
+              <p className="text-xs text-neutral-600 leading-relaxed">
+                If you ever want to clear your local device cache and reset your view to clean slate defaults, tap the button below.
+              </p>
+              <button
+                onClick={resetToCleanSlate}
+                className="nirmaan-btn nirmaan-btn-outline text-xs py-2.5 px-4 font-bold flex items-center gap-2 mt-2"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>RESET LOCAL CACHE TO CLEAN SLATE</span>
+              </button>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

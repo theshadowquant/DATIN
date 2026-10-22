@@ -13,7 +13,6 @@ import {
   Trophy,
   Sparkles,
   ExternalLink,
-  Edit3,
   QrCode,
   ShieldAlert,
 } from "lucide-react";
@@ -49,7 +48,7 @@ export default function DashboardPage() {
       />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 w-full space-y-8">
-        {/* Top Member / Team Identity Header matching NIRMAAN reference */}
+        {/* Top Member / Lead Identity Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-nirmaan-black/10">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2">
@@ -66,7 +65,7 @@ export default function DashboardPage() {
             </h1>
 
             <p className="text-xs sm:text-sm font-semibold text-neutral-600">
-              {activeMember.department} • Bapuji Institute of Engineering & Technology
+              {activeMember.department} • Bapuji Institute of Engineering &amp; Technology (BIET)
             </p>
 
             <div className="flex flex-wrap gap-2 pt-1">
@@ -97,11 +96,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Operational Stat Cards Grid matching NIRMAAN reference */}
+        {/* Operational Stat Cards Grid */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-xs sm:text-sm font-black uppercase tracking-wider text-nirmaan-black">
-              PARTICIPATION & MILESTONES STATUS
+              PARTICIPATION &amp; MILESTONES STATUS
             </h2>
             <span className="nirmaan-pill bg-nirmaan-black text-nirmaan-amber text-[10px] font-black">
               ACTIVE TERM 2026-27
@@ -113,40 +112,39 @@ export default function DashboardPage() {
               label="EVENT CHECK-IN"
               value={presentCount}
               total={registrations.length}
-              subtext={`${registrations.length - presentCount} pending verification`}
+              subtext={registrations.length === 0 ? "No events scheduled yet" : `${registrations.length - presentCount} pending`}
               icon={CalendarCheck}
               iconBgColor="bg-nirmaan-amber"
               iconTextColor="text-nirmaan-black"
-              progressPercent={(presentCount / Math.max(1, registrations.length)) * 100}
+              progressPercent={registrations.length > 0 ? (presentCount / registrations.length) * 100 : 0}
             />
             <StatCard
               label="PROJECT TASKS"
               value={completedTasks}
               total={myTasks.length}
-              subtext={`${myTasks.length - completedTasks} active items`}
+              subtext={myTasks.length === 0 ? "No active tasks assigned" : `${myTasks.length - completedTasks} active items`}
               icon={CheckSquare}
               iconBgColor="bg-nirmaan-orange"
               iconTextColor="text-white"
-              progressPercent={(completedTasks / Math.max(1, myTasks.length)) * 100}
+              progressPercent={myTasks.length > 0 ? (completedTasks / myTasks.length) * 100 : 0}
             />
             <StatCard
-              label="WORKSHOPS & SESSIONS"
+              label="CLUB SESSIONS"
               value={events.length}
-              subtext="Registered for upcoming flagship hackathon"
+              subtext={events.length === 0 ? "No sessions published yet" : `${events.length} published events`}
               icon={Trophy}
               iconBgColor="bg-nirmaan-purple"
               iconTextColor="text-white"
-              progressPercent={75}
+              progressPercent={events.length > 0 ? 50 : 0}
             />
             <StatCard
-              label="CONTRIBUTION TIER"
-              value="85"
-              total="100"
-              subtext="Eligible for term project certificate"
+              label="MEMBER TIER"
+              value="ACTIVE"
+              subtext="Verified student member"
               icon={Sparkles}
               iconBgColor="bg-nirmaan-blue"
               iconTextColor="text-white"
-              progressPercent={85}
+              progressPercent={100}
             />
           </div>
         </div>
@@ -188,15 +186,15 @@ export default function DashboardPage() {
         {canManageRoster && (
           <div className="nirmaan-card p-5 bg-white border-2 border-nirmaan-black flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-nirmaan-black text-nirmaan-amber flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-nirmaan-black text-nirmaan-amber flex items-center justify-center shrink-0 font-black">
                 <ShieldAlert className="w-5 h-5" />
               </div>
               <div>
                 <h4 className="font-display text-sm font-black uppercase text-nirmaan-black">
-                  ADMINISTRATIVE PRIVILEGES DETECTED
+                  ADMINISTRATIVE PRIVILEGES ACTIVE
                 </h4>
                 <p className="text-xs text-neutral-600 mt-0.5">
-                  You are viewing as a privileged coordinator. You have direct access to membership applications and audit logs.
+                  Manage membership admissions, schedule club events, review tasks, and view audit history.
                 </p>
               </div>
             </div>
@@ -219,7 +217,7 @@ export default function DashboardPage() {
                 datin<span className="text-nirmaan-red">.</span>
               </span>
               <span className="text-white/60 font-medium">
-                © 2026 DATIN | Data2Innovate Club Management Platform.
+                © 2026 DATIN | Data2Innovate • BIET Davangere.
               </span>
             </div>
           </div>
