@@ -20,6 +20,8 @@ export interface UserProfile {
   createdAt: string;
   updatedAt?: string;
   joinedAt?: string;
+  accountStatus?: 'active' | 'suspended';
+  membershipStatus?: 'approved' | 'pending' | 'rejected';
   status?: string;
   skills?: string[];
 }
@@ -116,5 +118,8 @@ export interface CoordinatorInvite {
   id: string;
   email: string;
   invitedBy?: string;
+  status: 'pending' | 'accepted' | 'revoked';
+  expiresAt: string;
+  acceptedAt?: string;
   createdAt: string;
 }

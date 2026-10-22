@@ -10,10 +10,10 @@ export default async function CoordinatorInvitesPage() {
 
   if (!user) redirect("/login");
 
-  // Fetch active coordinators
+  // Fetch all coordinators (active and suspended)
   const { data: coordinatorsData } = await supabase
     .from("profiles")
-    .select("id, email, full_name, department, created_at")
+    .select("id, email, full_name, department, account_status, created_at")
     .eq("role", "coordinator")
     .order("created_at", { ascending: true });
 
@@ -22,18 +22,21 @@ export default async function CoordinatorInvitesPage() {
     email: c.email,
     fullName: c.full_name || "Coordinator",
     department: c.department || "",
+    accountStatus: c.account_status || "active",
     createdAt: c.created_at,
   }));
 
-  // Fetch pending invitations
+  // Fetch invitations
   const { data: pendingData } = await supabase
     .from("coordinator_invites")
-    .select("id, email, created_at")
+    .select("id, email, status, expires_at, created_at")
     .order("created_at", { ascending: false });
 
   const pendingInvites = (pendingData || []).map((p: any) => ({
     id: p.id,
     email: p.email,
+    status: p.status || "pending",
+    expiresAt: p.expires_at || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     createdAt: p.created_at,
   }));
 
@@ -47,14 +50,14 @@ export default async function CoordinatorInvitesPage() {
               COMMITTEE MANAGEMENT
             </span>
             <span className="text-xs font-bold text-neutral-500">
-              ROLE DELEGATION
+              ROLE DELEGATION & GOVERNANCE
             </span>
           </div>
           <h1 className="font-display text-3xl sm:text-5xl font-black uppercase text-nirmaan-black tracking-tight">
             Coordinator Team & Access
           </h1>
           <p className="text-sm font-semibold text-neutral-600 mt-1 max-w-2xl">
-            Authorize new coordinators by email, audit existing organizers, and maintain strict access control for DATIN operations.
+            Authorize new coordinators through single-use expiring invitations, audit active administrators, and manage suspension policies.
           </p>
         </div>
       </div>
@@ -62,6 +65,7 @@ export default async function CoordinatorInvitesPage() {
       <CoordinatorInvitesManager
         coordinators={coordinators}
         pendingInvites={pendingInvites}
+        currentUserId={user.id}
       />
     </main>
   );

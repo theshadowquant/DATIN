@@ -44,11 +44,18 @@ export async function middleware(request: NextRequest) {
     // Fetch user profile from DB to verify trusted role
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role, onboarding_completed")
+      .select("role, onboarding_completed, account_status")
       .eq("id", user.id)
       .single();
 
-    if (!profile || profile.role !== "coordinator") {
+    if (profile?.account_status === "suspended") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("error", "account_suspended");
+      return NextResponse.redirect(url);
+    }
+
+    if (!profile || profile.role !== "coordinator" || profile.account_status !== "active") {
       // Deny participant access with safe redirect
       const url = request.nextUrl.clone();
       url.pathname = "/app/dashboard";
@@ -66,14 +73,28 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Check onboarding completion
-    if (!pathname.startsWith("/app/onboarding")) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("onboarding_completed, role")
-        .eq("id", user.id)
-        .single();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("onboarding_completed, role, account_status")
+      .eq("id", user.id)
+      .single();
 
+    if (profile?.account_status === "suspended") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("error", "account_suspended");
+      return NextResponse.redirect(url);
+    }
+
+    // Intentional routing policy: Coordinators belong in /coordinator
+    if (profile?.role === "coordinator") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/coordinator";
+      return NextResponse.redirect(url);
+    }
+
+    // Check onboarding completion for participants
+    if (!pathname.startsWith("/app/onboarding")) {
       if (profile && !profile.onboarding_completed) {
         const url = request.nextUrl.clone();
         url.pathname = "/app/onboarding";

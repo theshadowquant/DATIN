@@ -10,29 +10,43 @@ import {
   CheckCircle2,
   AlertCircle,
   Users,
+  Clock,
+  Ban,
+  RotateCcw,
+  ShieldAlert,
 } from "lucide-react";
-import { inviteCoordinator, revokeCoordinatorInvite } from "@/lib/actions/coordinator";
+import {
+  inviteCoordinator,
+  revokeCoordinatorInvite,
+  suspendCoordinator,
+  restoreCoordinator,
+} from "@/lib/actions/coordinator";
 
 interface ActiveCoordinator {
   id: string;
   email: string;
   fullName: string;
   department: string;
+  accountStatus: "active" | "suspended";
   createdAt: string;
 }
 
 interface PendingInvite {
   id: string;
   email: string;
+  status: "pending" | "accepted" | "revoked";
+  expiresAt: string;
   createdAt: string;
 }
 
 export default function CoordinatorInvitesManager({
   coordinators,
   pendingInvites,
+  currentUserId,
 }: {
   coordinators: ActiveCoordinator[];
   pendingInvites: PendingInvite[];
+  currentUserId: string;
 }) {
   const router = useRouter();
   const [emailInput, setEmailInput] = useState("");
@@ -48,9 +62,9 @@ export default function CoordinatorInvitesManager({
     try {
       const res = await inviteCoordinator(emailInput);
       if (!res.success) {
-        setErrorMsg(res.error || "Failed to send invitation.");
+        setErrorMsg(res.error || "Failed to issue invitation.");
       } else {
-        setSuccessMsg(`Coordinator invitation successfully recorded for ${emailInput}.`);
+        setSuccessMsg(`Single-use coordinator invitation created for ${emailInput}. Valid for 7 days.`);
         setEmailInput("");
         router.refresh();
       }
@@ -64,11 +78,52 @@ export default function CoordinatorInvitesManager({
   const handleRevoke = async (id: string, email: string) => {
     if (!confirm(`Revoke coordinator invitation for ${email}?`)) return;
     setErrorMsg(null);
+    setSuccessMsg(null);
     try {
       const res = await revokeCoordinatorInvite(id);
       if (!res.success) {
-        setErrorMsg(res.error || "Failed to revoke invite.");
+        setErrorMsg(res.error || "Failed to revoke invitation.");
       } else {
+        setSuccessMsg(`Invitation for ${email} has been revoked.`);
+        router.refresh();
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || "An error occurred.");
+    }
+  };
+
+  const handleSuspend = async (coordId: string, name: string) => {
+    if (coordId === currentUserId) {
+      if (!confirm(`You are about to suspend YOUR OWN coordinator account (${name}). Are you sure?`)) return;
+    } else {
+      if (!confirm(`Are you sure you want to suspend coordinator access for ${name}?`)) return;
+    }
+
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    try {
+      const res = await suspendCoordinator(coordId);
+      if (!res.success) {
+        setErrorMsg(res.error || "Failed to suspend coordinator.");
+      } else {
+        setSuccessMsg(`Coordinator ${name} has been suspended.`);
+        router.refresh();
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || "An error occurred.");
+    }
+  };
+
+  const handleRestore = async (coordId: string, name: string) => {
+    if (!confirm(`Restore active coordinator access for ${name}?`)) return;
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    try {
+      const res = await restoreCoordinator(coordId);
+      if (!res.success) {
+        setErrorMsg(res.error || "Failed to restore coordinator.");
+      } else {
+        setSuccessMsg(`Coordinator ${name} has been restored to active status.`);
         router.refresh();
       }
     } catch (err: any) {
@@ -82,13 +137,13 @@ export default function CoordinatorInvitesManager({
       <div className="rounded-3xl bg-white border-2 border-nirmaan-black/10 p-6 sm:p-8 space-y-6">
         <div>
           <span className="nirmaan-pill bg-nirmaan-black text-white text-[10px] font-black uppercase">
-            AUTHORIZATION ENGINE
+            ADMIN-CONTROLLED PROVISIONING
           </span>
           <h3 className="font-display text-2xl font-black text-nirmaan-black uppercase mt-1">
-            Invite a Club Coordinator
+            Issue Single-Use Coordinator Invitation
           </h3>
           <p className="text-xs font-medium text-neutral-600 mt-1 max-w-xl leading-relaxed">
-            Coordinators have administrative access to create events, inspect participant contact records, manage attendance scanners, and broadcast announcements.
+            Only authorized coordinators may provision or invite peer coordinators. Public users cannot register as coordinators. Each invitation is bound to the target email and expires automatically after 7 days.
           </p>
         </div>
 
@@ -98,7 +153,7 @@ export default function CoordinatorInvitesManager({
             <input
               type="email"
               required
-              placeholder="colleague@college.edu"
+              placeholder="peer.coordinator@college.edu"
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-2xl border-2 border-nirmaan-black bg-white text-nirmaan-black font-bold text-xs focus:outline-none focus:ring-4 focus:ring-nirmaan-amber/20"
@@ -110,7 +165,7 @@ export default function CoordinatorInvitesManager({
             className="nirmaan-pill bg-nirmaan-black text-white hover:bg-neutral-800 text-xs font-black uppercase px-6 py-3 flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] disabled:opacity-50"
           >
             <UserPlus className="w-4 h-4 text-nirmaan-amber" />
-            <span>{isSubmitting ? "Inviting..." : "Grant Role"}</span>
+            <span>{isSubmitting ? "Issuing..." : "Send Invitation"}</span>
           </button>
         </form>
 
@@ -131,81 +186,153 @@ export default function CoordinatorInvitesManager({
 
       {/* Two Columns: Active Coordinators & Pending Invites */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Active Coordinators */}
+        {/* Active / Suspended Coordinators */}
         <div className="rounded-3xl bg-white border-2 border-nirmaan-black/10 p-6 sm:p-7 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-nirmaan-amber" />
               <h4 className="font-display text-xl font-black text-nirmaan-black uppercase tracking-tight">
-                Active Coordinators ({coordinators.length})
+                Authorized Coordinators ({coordinators.length})
               </h4>
             </div>
           </div>
 
           <div className="space-y-2">
-            {coordinators.map((c) => (
-              <div
-                key={c.id}
-                className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-between text-xs"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-nirmaan-black text-white font-black text-xs flex items-center justify-center">
-                    {c.fullName ? c.fullName.charAt(0).toUpperCase() : "C"}
+            {coordinators.map((c) => {
+              const isActive = c.accountStatus === "active";
+              const isSelf = c.id === currentUserId;
+
+              return (
+                <div
+                  key={c.id}
+                  className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-between text-xs"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-8 h-8 rounded-full font-black text-xs flex items-center justify-center ${
+                        isActive
+                          ? "bg-nirmaan-black text-white"
+                          : "bg-red-200 text-red-900"
+                      }`}
+                    >
+                      {c.fullName ? c.fullName.charAt(0).toUpperCase() : "C"}
+                    </div>
+                    <div>
+                      <div className="font-black text-nirmaan-black flex items-center gap-1.5">
+                        <span>{c.fullName || "Coordinator"}</span>
+                        {isSelf && (
+                          <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded-full bg-neutral-200 text-neutral-800">
+                            YOU
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] font-semibold text-neutral-500">
+                        {c.email}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-black text-nirmaan-black">
-                      {c.fullName || "Coordinator"}
-                    </div>
-                    <div className="text-[11px] font-semibold text-neutral-500">
-                      {c.email}
-                    </div>
+
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                        isActive
+                          ? "bg-emerald-100 text-emerald-950 border border-emerald-300"
+                          : "bg-red-100 text-red-950 border border-red-300"
+                      }`}
+                    >
+                      {c.accountStatus.toUpperCase()}
+                    </span>
+
+                    {isActive ? (
+                      <button
+                        type="button"
+                        onClick={() => handleSuspend(c.id, c.fullName || c.email)}
+                        className="p-1.5 rounded-xl hover:bg-red-50 text-neutral-400 hover:text-nirmaan-red transition-colors"
+                        title="Suspend Coordinator Access"
+                      >
+                        <Ban className="w-3.5 h-3.5" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleRestore(c.id, c.fullName || c.email)}
+                        className="p-1.5 rounded-xl hover:bg-emerald-50 text-neutral-400 hover:text-emerald-600 transition-colors"
+                        title="Restore Coordinator Access"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
-
-                <span className="nirmaan-pill bg-nirmaan-amber text-nirmaan-black text-[9px] font-black uppercase px-2 py-0.5">
-                  ACTIVE
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Pending Invitations */}
+        {/* Pending & Expiring Invitations */}
         <div className="rounded-3xl bg-white border-2 border-nirmaan-black/10 p-6 sm:p-7 space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="font-display text-xl font-black text-nirmaan-black uppercase tracking-tight">
-              Pending Invites ({pendingInvites.length})
+              Outstanding Invitations ({pendingInvites.length})
             </h4>
           </div>
 
           {pendingInvites.length === 0 ? (
             <p className="text-xs font-medium text-neutral-400 py-6 text-center">
-              No pending coordinator invitations.
+              No outstanding coordinator invitations.
             </p>
           ) : (
             <div className="space-y-2">
-              {pendingInvites.map((inv) => (
-                <div
-                  key={inv.id}
-                  className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-between text-xs"
-                >
-                  <div>
-                    <div className="font-black text-nirmaan-black">{inv.email}</div>
-                    <div className="text-[10px] text-neutral-400">
-                      Sent on {new Date(inv.createdAt).toLocaleDateString()}
+              {pendingInvites.map((inv) => {
+                const isExpired = new Date(inv.expiresAt) < new Date();
+                const isRevoked = inv.status === "revoked";
+
+                return (
+                  <div
+                    key={inv.id}
+                    className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-between text-xs"
+                  >
+                    <div>
+                      <div className="font-black text-nirmaan-black">{inv.email}</div>
+                      <div className="text-[10px] text-neutral-400 flex items-center gap-1.5 mt-0.5">
+                        <Clock className="w-3 h-3" />
+                        <span>
+                          {isRevoked
+                            ? "Revoked"
+                            : isExpired
+                            ? "Expired"
+                            : `Expires on ${new Date(inv.expiresAt).toLocaleDateString()}`}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                          isRevoked
+                            ? "bg-neutral-200 text-neutral-700"
+                            : isExpired
+                            ? "bg-amber-100 text-amber-900 border border-amber-300"
+                            : "bg-blue-100 text-blue-900 border border-blue-300"
+                        }`}
+                      >
+                        {isRevoked ? "REVOKED" : isExpired ? "EXPIRED" : "PENDING"}
+                      </span>
+
+                      {!isRevoked && (
+                        <button
+                          type="button"
+                          onClick={() => handleRevoke(inv.id, inv.email)}
+                          className="p-1.5 rounded-xl hover:bg-red-50 text-neutral-400 hover:text-nirmaan-red transition-colors"
+                          title="Revoke Invitation"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleRevoke(inv.id, inv.email)}
-                    className="p-1.5 rounded-xl hover:bg-red-50 text-neutral-400 hover:text-nirmaan-red transition-colors"
-                    title="Revoke Invitation"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

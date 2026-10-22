@@ -90,9 +90,15 @@ export default function LoginPage() {
         // Resolve profile role
         const { data: profile } = await supabase
           .from("profiles")
-          .select("role, onboarding_completed")
+          .select("role, onboarding_completed, account_status")
           .eq("id", data.session.user.id)
           .single();
+
+        if (profile?.account_status === "suspended") {
+          await supabase.auth.signOut();
+          setErrorMsg("Access Denied: This coordinator account has been suspended by an authorized administrator.");
+          return;
+        }
 
         if (profile?.role === "coordinator") {
           router.push("/coordinator");

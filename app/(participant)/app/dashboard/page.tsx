@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import DigitalPassCard from "@/components/DigitalPassCard";
 import AnnouncementBanner from "@/components/AnnouncementBanner";
 import StatCard from "@/components/StatCard";
-import { QrCode, Calendar, Users, ExternalLink, Ticket, CheckCircle2, AlertCircle } from "lucide-react";
+import { QrCode, Calendar, Users, ExternalLink, Ticket, CheckCircle2, AlertCircle, Clock } from "lucide-react";
 import { UserProfile } from "@/lib/types";
 
 export default async function ParticipantDashboard({
@@ -86,6 +86,21 @@ export default async function ParticipantDashboard({
         <div className="p-4 rounded-2xl bg-amber-50 border-2 border-nirmaan-amber text-nirmaan-black text-xs font-bold flex items-center gap-2">
           <AlertCircle className="w-5 h-5 text-nirmaan-amber shrink-0" />
           <span>Access Denied: The coordinator workspace requires authorized coordinator credentials. You have been safely returned to your participant portal.</span>
+        </div>
+      )}
+
+      {profile.membership_status === "pending" && (
+        <div className="p-4 rounded-2xl bg-amber-50 border-2 border-nirmaan-amber text-nirmaan-black text-xs font-bold flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <Clock className="w-5 h-5 text-nirmaan-amber shrink-0" />
+            <div>
+              <div className="font-black text-amber-950 uppercase text-[11px]">Club Membership: Pending Review</div>
+              <div className="text-neutral-600 font-medium">Your account is verified. An authorized coordinator will review your student details for club membership.</div>
+            </div>
+          </div>
+          <span className="nirmaan-pill bg-nirmaan-amber text-nirmaan-black text-[10px] font-black uppercase px-2.5 py-0.5 shrink-0">
+            PENDING
+          </span>
         </div>
       )}
 

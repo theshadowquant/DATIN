@@ -407,60 +407,92 @@ export async function deleteAnnouncement(announcementId: string) {
   return { success: true };
 }
 
-// 7. INVITE COORDINATOR
+// 7. INVITE COORDINATOR (ADMIN-CONTROLLED, EXPIRING, SINGLE-USE)
 export async function inviteCoordinator(email: string) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Unauthorized" };
+  if (!user) return { success: false, error: "Unauthorized: Sign in required." };
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, full_name")
+    .select("role, full_name, account_status")
     .eq("id", user.id)
     .single();
 
-  if (profile?.role !== "coordinator") return { success: false, error: "Forbidden" };
+  if (profile?.role !== "coordinator" || profile?.account_status !== "active") {
+    return { success: false, error: "Forbidden: Only active coordinators can invite peers." };
+  }
 
   const cleanEmail = email.trim().toLowerCase();
   if (!cleanEmail || !cleanEmail.includes("@")) {
     return { success: false, error: "Please enter a valid email address." };
   }
 
-  // Insert invite
-  const { error } = await supabase
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days expiration
+
+  // Insert or refresh pending invite
+  const { data: newInvite, error } = await supabase
     .from("coordinator_invites")
-    .insert({
-      email: cleanEmail,
-      invited_by: user.id,
-    });
+    .upsert(
+      {
+        email: cleanEmail,
+        invited_by: user.id,
+        status: "pending",
+        expires_at: expiresAt,
+        accepted_at: null,
+      },
+      { onConflict: "email" }
+    )
+    .select()
+    .single();
 
   if (error) {
-    if (error.code === "23505") {
-      return { success: false, error: "An invitation has already been sent to this email." };
-    }
     return { success: false, error: error.message };
   }
 
-  // If user already registered with this email, upgrade their role immediately
-  await supabase
+  // If user is already registered in the system, promote them directly
+  const { data: existingUser } = await supabase
     .from("profiles")
-    .update({ role: "coordinator" })
-    .eq("email", cleanEmail);
+    .select("id, role")
+    .eq("email", cleanEmail)
+    .maybeSingle();
 
-  await supabase.from("audit_logs").insert({
-    actor_id: user.id,
-    actor_name: profile.full_name || user.email,
-    actor_role: "coordinator",
-    action: "COORDINATOR_INVITED",
-    entity_type: "coordinator_invite",
-    entity_id: cleanEmail,
-    details: `Invited ${cleanEmail} to the coordinator committee`,
-  });
+  if (existingUser) {
+    await supabase
+      .from("profiles")
+      .update({ role: "coordinator", onboarding_completed: true })
+      .eq("id", existingUser.id);
+
+    await supabase
+      .from("coordinator_invites")
+      .update({ status: "accepted", accepted_at: new Date().toISOString() })
+      .eq("id", newInvite.id);
+
+    await supabase.from("audit_logs").insert({
+      actor_id: user.id,
+      actor_name: profile.full_name || user.email,
+      actor_role: "coordinator",
+      action: "COORDINATOR_PROMOTED",
+      entity_type: "profile",
+      entity_id: existingUser.id,
+      details: `Existing participant account ${cleanEmail} upgraded to coordinator.`,
+    });
+  } else {
+    await supabase.from("audit_logs").insert({
+      actor_id: user.id,
+      actor_name: profile.full_name || user.email,
+      actor_role: "coordinator",
+      action: "COORDINATOR_INVITED",
+      entity_type: "coordinator_invite",
+      entity_id: newInvite.id,
+      details: `Created 7-day single-use coordinator invitation for ${cleanEmail} (Expires: ${expiresAt}).`,
+    });
+  }
 
   revalidatePath("/coordinator/invites");
-  return { success: true };
+  return { success: true, expiresAt };
 }
 
 // 8. REVOKE COORDINATOR INVITE
@@ -473,15 +505,17 @@ export async function revokeCoordinatorInvite(inviteId: string) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, full_name")
+    .select("role, full_name, account_status")
     .eq("id", user.id)
     .single();
 
-  if (profile?.role !== "coordinator") return { success: false, error: "Forbidden" };
+  if (profile?.role !== "coordinator" || profile?.account_status !== "active") {
+    return { success: false, error: "Forbidden" };
+  }
 
   const { error } = await supabase
     .from("coordinator_invites")
-    .delete()
+    .update({ status: "revoked" })
     .eq("id", inviteId);
 
   if (error) return { success: false, error: error.message };
@@ -493,7 +527,145 @@ export async function revokeCoordinatorInvite(inviteId: string) {
     action: "COORDINATOR_INVITE_REVOKED",
     entity_type: "coordinator_invite",
     entity_id: inviteId,
-    details: `Revoked coordinator invitation ${inviteId}`,
+    details: `Revoked coordinator invitation ID: ${inviteId}`,
+  });
+
+  revalidatePath("/coordinator/invites");
+  return { success: true };
+}
+
+// 9. SUSPEND COORDINATOR (WITH LAST-COORDINATOR PROTECTION)
+export async function suspendCoordinator(targetCoordinatorId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const { data: actingProfile } = await supabase
+    .from("profiles")
+    .select("role, full_name, account_status")
+    .eq("id", user.id)
+    .single();
+
+  if (actingProfile?.role !== "coordinator" || actingProfile?.account_status !== "active") {
+    return { success: false, error: "Forbidden: Active coordinator credentials required." };
+  }
+
+  // Last-coordinator protection rule
+  const { count: activeCoordCount } = await supabase
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("role", "coordinator")
+    .eq("account_status", "active");
+
+  if (activeCoordCount !== null && activeCoordCount <= 1) {
+    return {
+      success: false,
+      error: "Security Policy: Cannot suspend the last remaining active coordinator. The organization must retain at least one active administrator.",
+    };
+  }
+
+  // Fetch target info
+  const { data: targetProfile } = await supabase
+    .from("profiles")
+    .select("email, full_name")
+    .eq("id", targetCoordinatorId)
+    .single();
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ account_status: "suspended" })
+    .eq("id", targetCoordinatorId);
+
+  if (error) return { success: false, error: error.message };
+
+  await supabase.from("audit_logs").insert({
+    actor_id: user.id,
+    actor_name: actingProfile.full_name || user.email,
+    actor_role: "coordinator",
+    action: "COORDINATOR_SUSPENDED",
+    entity_type: "profile",
+    entity_id: targetCoordinatorId,
+    details: `Suspended coordinator access for ${targetProfile?.full_name || targetCoordinatorId} (${targetProfile?.email}).`,
+  });
+
+  revalidatePath("/coordinator/invites");
+  return { success: true };
+}
+
+// 10. RESTORE COORDINATOR
+export async function restoreCoordinator(targetCoordinatorId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const { data: actingProfile } = await supabase
+    .from("profiles")
+    .select("role, full_name, account_status")
+    .eq("id", user.id)
+    .single();
+
+  if (actingProfile?.role !== "coordinator" || actingProfile?.account_status !== "active") {
+    return { success: false, error: "Forbidden" };
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ account_status: "active" })
+    .eq("id", targetCoordinatorId);
+
+  if (error) return { success: false, error: error.message };
+
+  await supabase.from("audit_logs").insert({
+    actor_id: user.id,
+    actor_name: actingProfile.full_name || user.email,
+    actor_role: "coordinator",
+    action: "COORDINATOR_RESTORED",
+    entity_type: "profile",
+    entity_id: targetCoordinatorId,
+    details: `Restored coordinator access for ${targetCoordinatorId}.`,
+  });
+
+  revalidatePath("/coordinator/invites");
+  return { success: true };
+}
+
+// 11. APPROVE PARTICIPANT MEMBERSHIP
+export async function approveParticipantMembership(participantId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const { data: actingProfile } = await supabase
+    .from("profiles")
+    .select("role, full_name, account_status")
+    .eq("id", user.id)
+    .single();
+
+  if (actingProfile?.role !== "coordinator" || actingProfile?.account_status !== "active") {
+    return { success: false, error: "Forbidden" };
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ membership_status: "approved" })
+    .eq("id", participantId);
+
+  if (error) return { success: false, error: error.message };
+
+  await supabase.from("audit_logs").insert({
+    actor_id: user.id,
+    actor_name: actingProfile.full_name || user.email,
+    actor_role: "coordinator",
+    action: "PARTICIPANT_MEMBERSHIP_APPROVED",
+    entity_type: "profile",
+    entity_id: participantId,
+    details: `Approved membership for participant ${participantId}.`,
   });
 
   revalidatePath("/coordinator/invites");
