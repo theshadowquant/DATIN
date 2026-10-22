@@ -1,124 +1,120 @@
-export type UserRole = 
-  | 'super_admin' 
-  | 'core_committee' 
-  | 'domain_lead' 
-  | 'member' 
-  | 'public';
+// DATIN Command Center — Strict Two-Role Type Definitions
+
+export type UserRole = 'coordinator' | 'participant';
 
 export interface UserProfile {
   id: string;
-  name: string;
   email: string;
+  fullName: string;
+  name?: string;
+  usn?: string;
+  college: string;
+  department: string;
+  academicYear: number | string;
   phone?: string;
-  department: string;
-  academicYear: string;
-  domain: string;
   role: UserRole;
-  status: 'active' | 'pending' | 'suspended';
-  membershipId: string;
-  joinedAt: string;
-  skills: string[];
+  passToken: string;
+  membershipId?: string;
+  domain?: string;
+  onboardingCompleted: boolean;
+  createdAt: string;
+  updatedAt?: string;
+  joinedAt?: string;
+  status?: string;
+  skills?: string[];
 }
 
-export interface MemberPass {
-  passId: string;
-  memberId: string;
-  memberName: string;
-  membershipId: string;
-  domain: string;
-  roleName: string;
-  verificationToken: string;
-  status: 'valid' | 'revoked';
-  issuedAt: string;
-  term: string;
-}
+export type TeamFormat = 'solo' | 'duo' | 'squad_4' | 'flexible';
 
-export interface MembershipApplication {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  department: string;
-  academicYear: string;
-  domain: string;
-  skills: string;
-  statement: string;
-  status: 'pending' | 'approved' | 'rejected';
-  submittedAt: string;
-  notes?: string;
-}
-
-export interface ClubEvent {
+export interface EventItem {
   id: string;
   title: string;
   slug: string;
   description: string;
-  category: 'Hackathon' | 'Workshop' | 'Meetup' | 'Tech Talk';
+  category: string;
+  teamFormat: TeamFormat;
+  minTeamSize: number;
+  maxTeamSize: number;
+  venue: string;
   date: string;
   time: string;
-  venue: string;
-  capacity: number;
+  capacity: number; // Max total teams or participants
   registeredCount: number;
   isRegistrationOpen: boolean;
   isPublished: boolean;
+  createdBy?: string;
+  createdAt: string;
 }
 
-export interface EventRegistration {
+export interface TeamMember {
+  id: string;
+  teamId: string;
+  eventId: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  userUsn?: string;
+  userPhone?: string;
+  joinedAt: string;
+}
+
+export interface TeamItem {
   id: string;
   eventId: string;
-  memberId: string;
-  memberName: string;
-  memberEmail: string;
-  attendanceStatus: 'present' | 'absent';
-  registeredAt: string;
-  checkedInAt?: string;
+  eventTitle?: string;
+  name: string;
+  inviteCode: string;
+  leaderId: string;
+  leaderName?: string;
+  isFinalized: boolean;
+  members: TeamMember[];
+  createdAt: string;
 }
 
-export type TaskStatus = 'to_do' | 'in_progress' | 'in_review' | 'completed';
-export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
-
-export interface Task {
+export interface AttendanceRecord {
   id: string;
-  title: string;
-  description: string;
-  domain: string;
-  assignedToName: string;
-  assignedToEmail: string;
-  priority: TaskPriority;
-  status: TaskStatus;
-  dueDate: string;
-  updatedAt: string;
+  eventId: string;
+  eventTitle?: string;
+  userId: string;
+  userName?: string;
+  userUsn?: string;
+  userEmail?: string;
+  scannedBy?: string;
+  scannedByName?: string;
+  notes?: string;
+  scannedAt: string;
 }
 
-export interface Announcement {
+export interface AnnouncementItem {
   id: string;
   title: string;
   content: string;
   priority: 'normal' | 'important' | 'urgent';
+  authorId?: string;
   authorName: string;
-  authorRole: string;
-  publishedAt: string;
+  authorRole?: string;
+  publishedAt?: string;
   isPinned: boolean;
+  createdAt: string;
 }
 
-export interface AuditLog {
+export type Announcement = AnnouncementItem;
+
+export interface AuditRecord {
   id: string;
+  actorId?: string;
   actorName: string;
   actorRole: string;
   action: string;
-  entityType: 'application' | 'member' | 'event' | 'task' | 'attendance' | 'settings';
+  entityType: string;
   entityId: string;
   details: string;
-  timestamp: string;
+  createdAt: string;
 }
 
-export interface ClubSettings {
-  clubName: string;
-  shortDescription: string;
-  academicYear: string;
-  contactEmail: string;
-  instagramUrl: string;
-  linkedinUrl: string;
-  githubUrl: string;
-  applicationsOpen: boolean;
+export interface CoordinatorInvite {
+  id: string;
+  email: string;
+  invitedBy?: string;
+  createdAt: string;
 }
