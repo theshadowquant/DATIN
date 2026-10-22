@@ -1,0 +1,200 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --nirmaan-cream: #f1ebdd;
+  --nirmaan-cream-card: #f7f3ea;
+  --nirmaan-black: #141414;
+  --nirmaan-white: #ffffff;
+  --nirmaan-blue: #3357ff;
+  --nirmaan-amber: #f5a623;
+  --nirmaan-orange: #f2622e;
+  --nirmaan-red: #e6432c;
+  --nirmaan-green-dark: #2f9e52;
+  --nirmaan-green-bright: #3ecf4a;
+  --nirmaan-purple: #8b5cf6;
+  --font-display: "Archivo Black", "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+body, html {
+  max-width: 100%;
+  overflow-x: hidden;
+  background-color: var(--nirmaan-cream);
+  color: var(--nirmaan-black);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: var(--nirmaan-amber);
+  color: var(--nirmaan-black);
+}
+
+.font-display, h1, h2, h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.025em;
+}
+
+/* Reference Pill Controls */
+.nirmaan-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  transition: all 0.15s ease-in-out;
+}
+
+/* Reference Card Surface */
+.nirmaan-card {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  border: 1.5px solid rgba(20, 20, 20, 0.08);
+  transition: all 0.2s ease-in-out;
+}
+
+.nirmaan-card-cream {
+  background: var(--nirmaan-cream-card);
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  border: 1.5px solid rgba(20, 20, 20, 0.08);
+}
+
+/* Reference Button Utilities */
+.nirmaan-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  border-radius: 9999px;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+}
+
+.nirmaan-btn:active {
+  transform: scale(0.97);
+}
+
+.nirmaan-btn-primary {
+  background-color: var(--nirmaan-amber);
+  color: var(--nirmaan-black);
+  padding: 10px 20px;
+}
+.nirmaan-btn-primary:hover {
+  background-color: #e59818;
+}
+
+.nirmaan-btn-dark {
+  background-color: var(--nirmaan-black);
+  color: var(--nirmaan-white);
+  padding: 10px 20px;
+}
+.nirmaan-btn-dark:hover {
+  background-color: #262626;
+}
+
+.nirmaan-btn-outline {
+  background-color: #ffffff;
+  color: var(--nirmaan-black);
+  border: 1.5px solid rgba(20, 20, 20, 0.2);
+  padding: 8px 18px;
+}
+.nirmaan-btn-outline:hover {
+  background-color: var(--nirmaan-cream);
+  border-color: var(--nirmaan-black);
+}
+
+.nirmaan-btn-blue {
+  background-color: var(--nirmaan-blue);
+  color: #ffffff;
+  padding: 10px 20px;
+}
+.nirmaan-btn-blue:hover {
+  background-color: #2645d9;
+}
+
+/* Pulsing live dot */
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--nirmaan-green-bright);
+  animation: pulse-dot 1.8s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* Form input styling */
+.datin-input {
+  width: 100%;
+  border: 2px solid rgba(20, 20, 20, 0.15);
+  border-radius: 9999px;
+  padding: 0.65rem 1.15rem;
+  font-size: 0.875rem;
+  outline: none;
+  background: #ffffff;
+  color: var(--nirmaan-black);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.datin-input:focus {
+  border-color: var(--nirmaan-black);
+  box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.25);
+}
+
+.datin-textarea {
+  width: 100%;
+  border: 2px solid rgba(20, 20, 20, 0.15);
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  outline: none;
+  background: #ffffff;
+  color: var(--nirmaan-black);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.datin-textarea:focus {
+  border-color: var(--nirmaan-black);
+  box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.25);
+}
+
+/* Print styling for digital passes */
+@media print {
+  body, html {
+    background: #ffffff !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .no-print, header, footer, nav, button {
+    display: none !important;
+  }
+  .nirmaan-card {
+    box-shadow: none !important;
+    border: 2px solid #141414 !important;
+  }
+}
