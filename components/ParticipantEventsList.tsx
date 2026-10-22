@@ -162,9 +162,9 @@ export default function ParticipantEventsList({
             setActionError(null);
             setShowJoinModal(true);
           }}
-          className="nirmaan-pill bg-nirmaan-black text-white hover:bg-neutral-800 text-xs font-bold flex items-center justify-center gap-2 transition-transform hover:scale-[1.02]"
+          className="w-full sm:w-auto nirmaan-pill bg-nirmaan-black text-white hover:bg-neutral-800 text-xs font-bold flex items-center justify-center gap-2 py-2.5 px-4 transition-transform hover:scale-[1.02]"
         >
-          <KeyRound className="w-3.5 h-3.5 text-nirmaan-amber" />
+          <KeyRound className="w-3.5 h-3.5 text-nirmaan-amber shrink-0" />
           <span>Join Team with Code</span>
         </button>
       </div>
@@ -340,8 +340,8 @@ export default function ParticipantEventsList({
 
       {/* CREATE TEAM MODAL */}
       {selectedEventForCreate && (
-        <div className="fixed inset-0 z-50 bg-nirmaan-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white rounded-3xl border-2 border-nirmaan-black p-6 sm:p-8 space-y-6 animate-scale-in">
+        <div className="fixed inset-0 z-50 bg-nirmaan-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="w-full max-w-md bg-white rounded-3xl border-2 border-nirmaan-black p-5 sm:p-8 space-y-5 sm:space-y-6 animate-scale-in max-h-[92vh] overflow-y-auto my-auto">
             <div className="flex items-start justify-between">
               <div>
                 <span className="nirmaan-pill bg-nirmaan-amber text-nirmaan-black text-[10px] font-black uppercase">
@@ -410,8 +410,8 @@ export default function ParticipantEventsList({
 
       {/* JOIN TEAM MODAL */}
       {showJoinModal && (
-        <div className="fixed inset-0 z-50 bg-nirmaan-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white rounded-3xl border-2 border-nirmaan-black p-6 sm:p-8 space-y-6 animate-scale-in">
+        <div className="fixed inset-0 z-50 bg-nirmaan-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="w-full max-w-md bg-white rounded-3xl border-2 border-nirmaan-black p-5 sm:p-8 space-y-5 sm:space-y-6 animate-scale-in max-h-[92vh] overflow-y-auto my-auto">
             <div className="flex items-start justify-between">
               <div>
                 <span className="nirmaan-pill bg-nirmaan-blue text-white text-[10px] font-black uppercase">

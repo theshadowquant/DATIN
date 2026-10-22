@@ -117,12 +117,12 @@ export default function ParticipantTeamsView({
         <div className="text-xs font-bold text-neutral-600">
           Enrolled in <span className="text-nirmaan-black font-black">{teams.length}</span> active team{teams.length === 1 ? "" : "s"}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <Link
             href="/app/events"
-            className="nirmaan-pill bg-white hover:bg-neutral-100 text-nirmaan-black border border-nirmaan-black/10 text-xs font-bold flex items-center gap-1.5"
+            className="flex-1 sm:flex-initial nirmaan-pill bg-white hover:bg-neutral-100 text-nirmaan-black border border-nirmaan-black/10 text-xs font-bold flex items-center justify-center gap-1.5 py-2 px-3"
           >
-            <Calendar className="w-3.5 h-3.5 text-nirmaan-amber" />
+            <Calendar className="w-3.5 h-3.5 text-nirmaan-amber shrink-0" />
             <span>Browse Events</span>
           </Link>
           <button
@@ -130,9 +130,9 @@ export default function ParticipantTeamsView({
               setActionError(null);
               setShowJoinModal(true);
             }}
-            className="nirmaan-pill bg-nirmaan-black text-white hover:bg-neutral-800 text-xs font-bold flex items-center gap-1.5"
+            className="flex-1 sm:flex-initial nirmaan-pill bg-nirmaan-black text-white hover:bg-neutral-800 text-xs font-bold flex items-center justify-center gap-1.5 py-2 px-3"
           >
-            <KeyRound className="w-3.5 h-3.5 text-nirmaan-amber" />
+            <KeyRound className="w-3.5 h-3.5 text-nirmaan-amber shrink-0" />
             <span>Join Team with Code</span>
           </button>
         </div>
@@ -285,8 +285,8 @@ export default function ParticipantTeamsView({
 
       {/* JOIN TEAM MODAL */}
       {showJoinModal && (
-        <div className="fixed inset-0 z-50 bg-nirmaan-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white rounded-3xl border-2 border-nirmaan-black p-6 sm:p-8 space-y-6 animate-scale-in">
+        <div className="fixed inset-0 z-50 bg-nirmaan-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="w-full max-w-md bg-white rounded-3xl border-2 border-nirmaan-black p-5 sm:p-8 space-y-5 sm:space-y-6 animate-scale-in max-h-[92vh] overflow-y-auto my-auto">
             <div className="flex items-start justify-between">
               <div>
                 <span className="nirmaan-pill bg-nirmaan-blue text-white text-[10px] font-black uppercase">

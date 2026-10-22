@@ -57,30 +57,30 @@ export default async function PublicHomePage() {
     <main className="space-y-16 sm:space-y-24 py-8 sm:py-12">
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-[40px] bg-white border-2 border-nirmaan-black p-8 sm:p-14 lg:p-16 relative overflow-hidden shadow-sm">
+        <div className="rounded-[28px] sm:rounded-[40px] bg-white border-2 border-nirmaan-black p-6 sm:p-12 lg:p-16 relative overflow-hidden shadow-sm">
           {/* Subtle Decorative Elements */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-nirmaan-amber/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-nirmaan-blue/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-24 -right-24 w-72 sm:w-96 h-72 sm:h-96 bg-nirmaan-amber/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-72 sm:w-96 h-72 sm:h-96 bg-nirmaan-blue/10 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="relative z-10 max-w-3xl space-y-6">
-            <div className="inline-flex items-center gap-2">
-              <span className="nirmaan-pill bg-nirmaan-amber text-nirmaan-black text-xs font-black uppercase tracking-wider shadow-xs">
+          <div className="relative z-10 max-w-3xl space-y-5 sm:space-y-6">
+            <div className="inline-flex flex-wrap items-center gap-2">
+              <span className="nirmaan-pill bg-nirmaan-amber text-nirmaan-black text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-xs">
                 BIET TECH CLUB
               </span>
-              <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
+              <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider">
                 Bapuji Institute of Engineering and Technology
               </span>
             </div>
 
-            <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-black uppercase text-nirmaan-black tracking-tight leading-[0.95]">
+            <h1 className="font-display text-3xl sm:text-6xl lg:text-7xl font-black uppercase text-nirmaan-black tracking-tight leading-[1] sm:leading-[0.95]">
               DATIN<span className="text-nirmaan-red font-black">.</span>
               <br />
-              <span className="text-neutral-900 text-3xl sm:text-5xl lg:text-6xl">
+              <span className="text-neutral-900 text-2xl sm:text-5xl lg:text-6xl">
                 DATA TO INNOVATE
               </span>
             </h1>
 
-            <p className="text-base sm:text-lg font-medium text-neutral-700 leading-relaxed max-w-2xl">
+            <p className="text-sm sm:text-lg font-medium text-neutral-700 leading-relaxed max-w-2xl">
               The premier student engineering community at BIET Davangere dedicated to Machine Learning, Data Analytics, and Full-Stack Innovation. Build real products, compete in team hackathons, and accelerate your engineering journey.
             </p>
 
@@ -88,17 +88,17 @@ export default async function PublicHomePage() {
             <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <Link
                 href="/login"
-                className="nirmaan-pill bg-nirmaan-black text-white hover:bg-neutral-800 text-sm font-black uppercase py-3.5 px-8 flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-sm"
+                className="nirmaan-pill bg-nirmaan-black text-white hover:bg-neutral-800 text-xs sm:text-sm font-black uppercase py-3.5 px-6 sm:px-8 flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-sm text-center"
               >
                 <span>Participant & Coordinator Login</span>
-                <ArrowRight className="w-4 h-4 text-nirmaan-amber" />
+                <ArrowRight className="w-4 h-4 text-nirmaan-amber shrink-0" />
               </Link>
 
               <Link
                 href="/events"
-                className="nirmaan-pill bg-white hover:bg-neutral-100 text-nirmaan-black border-2 border-nirmaan-black text-sm font-bold py-3.5 px-8 flex items-center justify-center gap-2 transition-colors"
+                className="nirmaan-pill bg-white hover:bg-neutral-100 text-nirmaan-black border-2 border-nirmaan-black text-xs sm:text-sm font-bold py-3.5 px-6 sm:px-8 flex items-center justify-center gap-2 transition-colors text-center"
               >
-                <Calendar className="w-4 h-4 text-nirmaan-amber" />
+                <Calendar className="w-4 h-4 text-nirmaan-amber shrink-0" />
                 <span>Browse Club Events</span>
               </Link>
             </div>

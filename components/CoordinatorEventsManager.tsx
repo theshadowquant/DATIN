@@ -151,9 +151,9 @@ export default function CoordinatorEventsManager({
             setErrorMsg(null);
             setShowCreateModal(true);
           }}
-          className="nirmaan-pill bg-nirmaan-black text-white hover:bg-neutral-800 text-xs font-black uppercase flex items-center justify-center gap-2 py-2 px-4 transition-transform hover:scale-[1.02]"
+          className="w-full sm:w-auto nirmaan-pill bg-nirmaan-black text-white hover:bg-neutral-800 text-xs font-black uppercase flex items-center justify-center gap-2 py-2.5 px-4 transition-transform hover:scale-[1.02]"
         >
-          <Plus className="w-4 h-4 text-nirmaan-amber" />
+          <Plus className="w-4 h-4 text-nirmaan-amber shrink-0" />
           <span>Create New Event</span>
         </button>
       </div>
@@ -293,8 +293,8 @@ export default function CoordinatorEventsManager({
 
       {/* CREATE EVENT MODAL */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-nirmaan-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="w-full max-w-2xl bg-white rounded-3xl border-2 border-nirmaan-black p-6 sm:p-8 space-y-6 my-8">
+        <div className="fixed inset-0 z-50 bg-nirmaan-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="w-full max-w-2xl bg-white rounded-3xl border-2 border-nirmaan-black p-5 sm:p-8 space-y-5 sm:space-y-6 my-auto max-h-[92vh] overflow-y-auto">
             <div className="flex items-start justify-between">
               <div>
                 <span className="nirmaan-pill bg-nirmaan-amber text-nirmaan-black text-[10px] font-black uppercase">

@@ -102,8 +102,8 @@ export default function CoordinatorAttendanceScanner({
   return (
     <div className="space-y-6">
       {/* Event Selector & Live Counter */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-nirmaan-black/10">
-        <div className="space-y-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-nirmaan-black/10">
+        <div className="space-y-1 w-full sm:w-auto">
           <label className="block text-[10px] font-black uppercase tracking-wider text-neutral-400">
             Active Check-In Gate Event
           </label>
@@ -115,7 +115,7 @@ export default function CoordinatorAttendanceScanner({
               setResultDuplicate(null);
               setErrorMessage(null);
             }}
-            className="px-4 py-2.5 rounded-2xl border-2 border-nirmaan-black text-sm font-black text-nirmaan-black bg-white focus:outline-none"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-2xl border-2 border-nirmaan-black text-sm font-black text-nirmaan-black bg-white focus:outline-none"
           >
             {events.length === 0 && <option value="">No events available</option>}
             {events.map((evt) => (
@@ -127,8 +127,8 @@ export default function CoordinatorAttendanceScanner({
         </div>
 
         {currentEvent && (
-          <div className="flex items-center gap-4">
-            <div className="text-right">
+          <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-neutral-100">
+            <div className="text-left sm:text-right">
               <span className="text-[10px] font-black uppercase tracking-wider text-neutral-400 block">
                 Total Check-Ins
               </span>
@@ -136,7 +136,7 @@ export default function CoordinatorAttendanceScanner({
                 {logs.length} / {currentEvent.registeredCount}
               </span>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-nirmaan-amber flex items-center justify-center text-nirmaan-black">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-nirmaan-amber flex items-center justify-center text-nirmaan-black shrink-0">
               <QrCode className="w-6 h-6" />
             </div>
           </div>

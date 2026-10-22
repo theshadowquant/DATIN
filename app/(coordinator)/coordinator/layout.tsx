@@ -129,28 +129,56 @@ export default async function CoordinatorLayout({
           </div>
         </div>
 
-        {/* Mobile Navigation Row */}
-        <div className="lg:hidden border-t border-neutral-800 px-4 py-2 flex items-center gap-2 overflow-x-auto text-xs font-bold">
-          <Link href="/coordinator" className="px-2.5 py-1 rounded-full bg-neutral-800 text-white shrink-0">
-            Overview
+        {/* Mobile Coordinator Navigation Strip with Touch Pills */}
+        <div className="lg:hidden border-t border-neutral-800 px-3 py-2 flex items-center gap-2 overflow-x-auto text-xs font-bold">
+          <Link
+            href="/coordinator"
+            className="px-3 py-1.5 rounded-full bg-neutral-800 text-white hover:bg-neutral-700 shrink-0 flex items-center gap-1.5"
+          >
+            <LayoutDashboard className="w-3.5 h-3.5 text-nirmaan-amber" />
+            <span>Overview</span>
           </Link>
-          <Link href="/coordinator/events" className="px-2.5 py-1 rounded-full text-neutral-400 hover:text-white shrink-0">
-            Events
+          <Link
+            href="/coordinator/events"
+            className="px-3 py-1.5 rounded-full bg-neutral-900 text-neutral-300 hover:text-white shrink-0 flex items-center gap-1.5"
+          >
+            <Calendar className="w-3.5 h-3.5 text-neutral-400" />
+            <span>Events</span>
           </Link>
-          <Link href="/coordinator/teams" className="px-2.5 py-1 rounded-full text-neutral-400 hover:text-white shrink-0">
-            Teams
+          <Link
+            href="/coordinator/teams"
+            className="px-3 py-1.5 rounded-full bg-neutral-900 text-neutral-300 hover:text-white shrink-0 flex items-center gap-1.5"
+          >
+            <Users className="w-3.5 h-3.5 text-neutral-400" />
+            <span>Teams</span>
           </Link>
-          <Link href="/coordinator/attendance" className="px-2.5 py-1 rounded-full text-neutral-400 hover:text-white shrink-0">
-            Scanner
+          <Link
+            href="/coordinator/attendance"
+            className="px-3 py-1.5 rounded-full bg-neutral-900 text-neutral-300 hover:text-white shrink-0 flex items-center gap-1.5"
+          >
+            <QrCode className="w-3.5 h-3.5 text-neutral-400" />
+            <span>Gate Scanner</span>
           </Link>
-          <Link href="/coordinator/announcements" className="px-2.5 py-1 rounded-full text-neutral-400 hover:text-white shrink-0">
-            Announcements
+          <Link
+            href="/coordinator/announcements"
+            className="px-3 py-1.5 rounded-full bg-neutral-900 text-neutral-300 hover:text-white shrink-0 flex items-center gap-1.5"
+          >
+            <Bell className="w-3.5 h-3.5 text-neutral-400" />
+            <span>Announcements</span>
           </Link>
-          <Link href="/coordinator/invites" className="px-2.5 py-1 rounded-full text-neutral-400 hover:text-white shrink-0">
-            Invites
+          <Link
+            href="/coordinator/invites"
+            className="px-3 py-1.5 rounded-full bg-neutral-900 text-neutral-300 hover:text-white shrink-0 flex items-center gap-1.5"
+          >
+            <UserPlus className="w-3.5 h-3.5 text-neutral-400" />
+            <span>Invites</span>
           </Link>
-          <Link href="/coordinator/audit-logs" className="px-2.5 py-1 rounded-full text-neutral-400 hover:text-white shrink-0">
-            Audit
+          <Link
+            href="/coordinator/audit-logs"
+            className="px-3 py-1.5 rounded-full bg-neutral-900 text-neutral-300 hover:text-white shrink-0 flex items-center gap-1.5"
+          >
+            <ShieldAlert className="w-3.5 h-3.5 text-neutral-400" />
+            <span>Audit</span>
           </Link>
         </div>
       </header>

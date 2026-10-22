@@ -125,20 +125,20 @@ export default async function ParticipantDashboard({
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 self-start md:self-auto">
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
           <Link
             href="/app/events"
-            className="nirmaan-btn nirmaan-btn-primary text-xs px-5 py-2.5 font-black flex items-center gap-1.5 shadow-xs"
+            className="flex-1 sm:flex-initial nirmaan-btn nirmaan-btn-primary text-xs px-4 sm:px-5 py-2.5 font-black flex items-center justify-center gap-1.5 shadow-xs"
           >
-            <Calendar className="w-4 h-4" />
+            <Calendar className="w-4 h-4 shrink-0" />
             <span>BROWSE EVENTS</span>
           </Link>
           <Link
             href="/app/pass"
-            className="nirmaan-btn nirmaan-btn-dark text-xs px-5 py-2.5 font-black flex items-center gap-1.5 shadow-xs"
+            className="flex-1 sm:flex-initial nirmaan-btn nirmaan-btn-dark text-xs px-4 sm:px-5 py-2.5 font-black flex items-center justify-center gap-1.5 shadow-xs"
           >
-            <QrCode className="w-4 h-4 text-nirmaan-amber" />
-            <span>VIEW FULL PASS</span>
+            <QrCode className="w-4 h-4 text-nirmaan-amber shrink-0" />
+            <span>VIEW PASS</span>
           </Link>
         </div>
       </div>
@@ -229,7 +229,7 @@ export default async function ParticipantDashboard({
                 {teamMemberships.map((tm: any) => (
                   <div
                     key={tm.id}
-                    className="p-4 rounded-2xl bg-[#FAF8F3] border border-nirmaan-black/10 flex items-center justify-between gap-3"
+                    className="p-4 rounded-2xl bg-[#FAF8F3] border border-nirmaan-black/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                   >
                     <div>
                       <span className="nirmaan-pill bg-nirmaan-black text-white text-[9px] font-black uppercase">
@@ -246,7 +246,7 @@ export default async function ParticipantDashboard({
                       </p>
                     </div>
 
-                    <span className="nirmaan-pill bg-green-100 text-green-800 text-[10px] font-black uppercase">
+                    <span className="nirmaan-pill bg-green-100 text-green-800 text-[10px] font-black uppercase self-start sm:self-center shrink-0">
                       CONFIRMED
                     </span>
                   </div>

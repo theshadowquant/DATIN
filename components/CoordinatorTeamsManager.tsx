@@ -126,23 +126,23 @@ export default function CoordinatorTeamsManager({
   return (
     <div className="space-y-6">
       {/* Control Bar: Event Filter, Search, CSV Export */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-3xl border border-nirmaan-black/10">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-3xl border border-nirmaan-black/10">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+          <div className="relative flex-1 sm:flex-initial">
             <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search by team, code, USN, member..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 rounded-2xl border border-neutral-300 text-xs font-bold w-64 sm:w-80 focus:outline-none focus:ring-2 focus:ring-nirmaan-black"
+              className="pl-9 pr-4 py-2.5 rounded-2xl border border-neutral-300 text-xs font-bold w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-nirmaan-black"
             />
           </div>
 
           <select
             value={selectedEventId}
             onChange={(e) => setSelectedEventId(e.target.value)}
-            className="px-3 py-2 rounded-2xl border border-neutral-300 text-xs font-bold bg-white text-nirmaan-black"
+            className="px-3 py-2.5 rounded-2xl border border-neutral-300 text-xs font-bold bg-white text-nirmaan-black w-full sm:w-auto"
           >
             <option value="all">All Events ({events.length})</option>
             {events.map((e) => (
@@ -153,7 +153,7 @@ export default function CoordinatorTeamsManager({
           </select>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between sm:justify-end gap-3 w-full md:w-auto pt-2 md:pt-0 border-t md:border-t-0 border-neutral-100">
           <div className="text-xs font-bold text-neutral-500">
             Showing <strong className="text-nirmaan-black">{filteredTeams.length}</strong> teams
           </div>
@@ -161,9 +161,9 @@ export default function CoordinatorTeamsManager({
             type="button"
             onClick={handleExportCSV}
             disabled={filteredTeams.length === 0}
-            className="nirmaan-pill bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black uppercase flex items-center gap-1.5 py-2 px-4 transition-transform hover:scale-[1.02] disabled:opacity-50"
+            className="nirmaan-pill bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black uppercase flex items-center justify-center gap-1.5 py-2.5 px-4 transition-transform hover:scale-[1.02] disabled:opacity-50"
           >
-            <FileSpreadsheet className="w-4 h-4" />
+            <FileSpreadsheet className="w-4 h-4 shrink-0" />
             <span>Export CSV</span>
           </button>
         </div>

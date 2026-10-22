@@ -91,7 +91,39 @@ export default async function ParticipantLayout({
         </div>
       </header>
 
-      <div className="flex-1">{children}</div>
+      <div className="flex-1 pb-20 md:pb-0">{children}</div>
+
+      {/* Mobile Participant Bottom Dock Navigation */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-[#f1ebdd]/98 backdrop-blur-md border-t-2 border-nirmaan-black/15 z-40 px-3 py-2.5 flex items-center justify-around no-print shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+        <Link
+          href="/app/dashboard"
+          className="flex flex-col items-center gap-1 py-1 px-3 rounded-2xl text-nirmaan-black hover:bg-white/80 active:scale-95 transition-all min-w-[64px]"
+        >
+          <LayoutDashboard className="w-5 h-5 text-nirmaan-black" />
+          <span className="text-[10px] font-black uppercase tracking-tight">Home</span>
+        </Link>
+        <Link
+          href="/app/pass"
+          className="flex flex-col items-center gap-1 py-1 px-3 rounded-2xl text-nirmaan-black hover:bg-white/80 active:scale-95 transition-all min-w-[64px]"
+        >
+          <QrCode className="w-5 h-5 text-nirmaan-amber" />
+          <span className="text-[10px] font-black uppercase tracking-tight">Pass</span>
+        </Link>
+        <Link
+          href="/app/events"
+          className="flex flex-col items-center gap-1 py-1 px-3 rounded-2xl text-nirmaan-black hover:bg-white/80 active:scale-95 transition-all min-w-[64px]"
+        >
+          <Calendar className="w-5 h-5 text-nirmaan-blue" />
+          <span className="text-[10px] font-black uppercase tracking-tight">Events</span>
+        </Link>
+        <Link
+          href="/app/teams"
+          className="flex flex-col items-center gap-1 py-1 px-3 rounded-2xl text-nirmaan-black hover:bg-white/80 active:scale-95 transition-all min-w-[64px]"
+        >
+          <Users className="w-5 h-5 text-purple-600" />
+          <span className="text-[10px] font-black uppercase tracking-tight">Teams</span>
+        </Link>
+      </nav>
 
       <footer className="w-full bg-nirmaan-black text-white py-6 border-t border-nirmaan-black mt-16 no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">

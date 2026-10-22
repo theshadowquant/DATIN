@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, QrCode } from "lucide-react";
+import PublicMobileNav from "@/components/PublicMobileNav";
 
 export default function PublicLayout({
   children,
@@ -48,8 +49,8 @@ export default function PublicLayout({
             </Link>
           </nav>
 
-          {/* Login / Portal Button */}
-          <div className="flex items-center gap-2">
+          {/* Desktop Login / Portal Button */}
+          <div className="hidden md:flex items-center gap-2">
             <Link
               href="/login"
               className="nirmaan-pill bg-nirmaan-black text-white hover:bg-neutral-800 text-xs font-black uppercase flex items-center gap-1.5 py-2 px-4 transition-transform hover:scale-[1.02]"
@@ -58,6 +59,9 @@ export default function PublicLayout({
               <ArrowRight className="w-3.5 h-3.5 text-nirmaan-amber" />
             </Link>
           </div>
+
+          {/* Mobile Navigation Drawer */}
+          <PublicMobileNav />
         </div>
       </header>
 
